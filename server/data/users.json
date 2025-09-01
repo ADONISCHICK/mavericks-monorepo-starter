@@ -1,0 +1,12 @@
+[
+  {
+    "id": "630f83bf-c151-4830-b1a0-0e31bb13850d",
+    "name": "Adonis",
+    "email": "admin@themavericksgroup.co.uk",
+    "phone": "+447918286078",
+    "passwordHash": "$2b$10$k/XrFIhPRPgrLkE5fYkcbetXeqWqIcUhcoLmfbgQQ17A2l2L7b7fa",
+    "verified": true,
+    "pendingCode": null,
+    "createdAt": 1756092912134
+  }
+]

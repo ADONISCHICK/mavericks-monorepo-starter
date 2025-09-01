@@ -1,0 +1,13 @@
+{
+  "name": "mavericks-monorepo-starter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root workspace for Mavericks (client + server)",
+  "scripts": {
+    "dev": "concurrently -n API,WEB -c blue,green \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "start": "concurrently -n API,WEB -c blue,green \"npm --prefix server start\" \"npm --prefix client start\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
