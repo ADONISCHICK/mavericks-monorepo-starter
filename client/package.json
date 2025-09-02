@@ -4,15 +4,17 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start"
+    "build": "next build",
+    "start": "HOST=0.0.0.0 next start -p ${PORT:-3000}",
+    "lint": "eslint"
   },
   "dependencies": {
-    "@paypal/react-paypal-js": "^8.4.0",
-    "@stripe/react-stripe-js": "^2.7.1",
-    "@stripe/stripe-js": "^3.4.1",
     "next": "15.5.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
+    /* keep your other deps here exactly as you have them */
+  },
+  "devDependencies": {
+    /* keep your dev deps here exactly as you have them */
   }
 }
