@@ -1,17 +1,22 @@
-// client/next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    // Allow external product/hero images
-    remotePatterns: [
-      { protocol: "https", hostname: "picsum.photos" },
-      { protocol: "https", hostname: "**.onrender.com" },   // if your API ever serves images
-      { protocol: "https", hostname: "**.vercel.app" },     // if you host images on the app
-      { protocol: "https", hostname: "**.cloudfront.net" }, // optional CDN
-    ],
-  },
   experimental: {
-    turbopack: { root: __dirname },
+    turbopack: {
+      // force Turbopack to treat *this folder* as root
+      root: __dirname,
+    },
   },
+
+  // make sure output file tracing uses the client folder, not repo root
+  outputFileTracingRoot: __dirname,
+
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: '**.cloudfront.net' }
+    ]
+  }
 };
+
 export default nextConfig;
