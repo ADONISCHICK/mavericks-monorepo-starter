@@ -1,119 +1,74 @@
 // server/server.js
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
+
+// --- core middleware ---
 app.use(express.json());
+app.use(cors({ origin: '*' }));
 
-// CORS — open while deploying; we can lock this down later to your Vercel domain(s)
-app.use(
-  cors({
-    origin: true, // allows any origin during setup; tighten later
-    credentials: false,
-  })
-);
+// --- quick health + root routes so Render health-checks pass ---
+app.get('/', (_req, res) => res.status(200).send('API OK'));
+app.get('/health', (_req, res) => res.status(200).json({ ok: true }));
 
-// --- data helpers ---
-const DATA_DIR = path.join(__dirname, "data");
-function readJson(filename) {
-  const p = path.join(DATA_DIR, filename);
-  return JSON.parse(fs.readFileSync(p, "utf8"));
-}
+// --- demo data & routes (adjust to your project) ---
+const products = require(path.join(__dirname, 'data', 'products.json'));
+const ordersRouter = require('./routes/orders');
+const paymentsRouter = require('./routes/payments');
 
-// Load data once (good enough for a demo/mock API)
-const PRODUCTS = readJson("products.json");
-const ORDERS = readJson("orders.json");
-
-// --- basic routes so Render has something to show ---
-app.get("/", (req, res) => {
-  res
-    .type("text")
-    .send(
-      [
-        "Mavericks API ✅",
-        "",
-        "Try these endpoints:",
-        "  • GET /health",
-        "  • GET /products",
-        "  • GET /products/1",
-        "",
-        "Tip: your client should point NEXT_PUBLIC_API_URL to this base URL.",
-      ].join("\n")
-    );
-});
-
-app.get("/health", (req, res) => {
-  res.json({ ok: true, uptime: process.uptime() });
-});
-
-// --- products listing with filters + pagination ---
-app.get("/products", (req, res) => {
-  let {
-    q,
-    category,
-    min,
-    max,
-    page = "1",
-    limit = "24",
-    sort = "newest",
-  } = req.query;
-
-  let list = PRODUCTS.slice();
+app.get('/products', (req, res) => {
+  // basic filter/sort/paginate kept from your earlier setup
+  let list = products.slice();
+  const { q, category, min, max, sort = 'newest', limit = '24', page = '1' } = req.query;
 
   if (q) {
     const s = String(q).toLowerCase();
     list = list.filter(
-      (p) =>
-        (p.title || "").toLowerCase().includes(s) ||
-        (p.description || "").toLowerCase().includes(s)
+      p =>
+        p.title.toLowerCase().includes(s) ||
+        (p.description || '').toLowerCase().includes(s)
     );
   }
-  if (category) {
-    list = list.filter((p) => String(p.category || "") === String(category));
-  }
-  if (min) list = list.filter((p) => Number(p.price) >= Number(min));
-  if (max) list = list.filter((p) => Number(p.price) <= Number(max));
+  if (category) list = list.filter(p => p.category === category);
+  if (min) list = list.filter(p => p.price >= Number(min));
+  if (max) list = list.filter(p => p.price <= Number(max));
 
-  switch (String(sort)) {
-    case "price_asc":
-      list.sort((a, b) => Number(a.price) - Number(b.price));
+  switch (sort) {
+    case 'price_asc':
+      list.sort((a, b) => a.price - b.price);
       break;
-    case "price_desc":
-      list.sort((a, b) => Number(b.price) - Number(a.price));
+    case 'price_desc':
+      list.sort((a, b) => b.price - a.price);
       break;
-    case "newest":
+    case 'newest':
     default:
-      list.sort(
-        (a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0)
-      );
+      list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      break;
   }
 
   const total = list.length;
   const p = Math.max(1, parseInt(page, 10) || 1);
-  const l = Math.min(60, parseInt(limit, 10) || 24);
+  const l = Math.min(60, Math.max(1, parseInt(limit, 10) || 24));
   const start = (p - 1) * l;
   const items = list.slice(start, start + l);
 
   res.json({ page: p, limit: l, total, items });
 });
 
-// --- single product ---
-app.get("/products/:id", (req, res) => {
-  const id = String(req.params.id);
-  const item = PRODUCTS.find((p) => String(p.id) === id);
-  if (!item) return res.status(404).json({ error: "Not found" });
+app.get('/products/:id', (req, res) => {
+  const item = products.find(p => p.id === req.params.id);
+  if (!item) return res.status(404).json({ error: 'Not found' });
   res.json(item);
 });
 
-// (stub) orders to show the server is alive; expand later
-app.get("/orders", (req, res) => {
-  res.json({ total: ORDERS.length, items: ORDERS });
-});
+// mount other route files if you use them
+app.use('/api/orders', ordersRouter);
+app.use('/api/payments', paymentsRouter);
 
-// IMPORTANT for Render: use their provided PORT and bind to 0.0.0.0
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, "0.0.0.0", () => {
+// --- start ---
+const PORT = process.env.PORT || 4000; // Render provides PORT
+app.listen(PORT, () => {
   console.log(`API running at http://localhost:${PORT}`);
 });

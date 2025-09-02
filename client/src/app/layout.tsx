@@ -34,3 +34,5 @@ export default function RootLayout({
     </html>
   );
 }
+<link rel="canonical" href="https://mavericks-monorepo-starter.onrender.com/" />
+<meta name="robots" content="index, follow" />
