@@ -1,15 +1,24 @@
-// client/src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import Assistant from "./components/Assistant"; // floating AI widget
+
+// If you have these components, they will render.
+// If not, you can remove them safely.
+import ClientRoot from "./components/ClientRoot";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
   title: "Mavericks — Built by Cloud Sailors Lab",
-  description:
-    "Premium goods, verified sellers, global delivery. Built to feel like a billion-dollar experience.",
-  icons: { icon: "/favicon.ico" },
-  applicationName: "Mavericks",
-  keywords: ["Mavericks", "Marketplace", "Ecommerce", "Cloud Sailors Lab"],
+  description: "Premium goods, verified sellers, global delivery.",
+  // ✅ This becomes <link rel="canonical" .../> in <head>
+  alternates: {
+    canonical: "https://mavericks-monorepo-starter-1.onrender.com/",
+  },
+  // ✅ This becomes <meta name="robots" .../> in <head>
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -18,21 +27,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className="
-          min-h-screen bg-gradient-to-b from-[#0b1020] to-[#05070f]
-          text-neutral-100 antialiased
-        "
-      >
-        {/* Your app pages */}
-        {children}
-
-        {/* One-time global widgets */}
-        <Assistant />
+    <html lang="en">
+      <body>
+        <ClientRoot>
+          {/* Remove Header/Footer if you don’t have these components */}
+          <Header />
+          {children}
+          <Footer />
+        </ClientRoot>
       </body>
     </html>
   );
 }
-<link rel="canonical" href="https://mavericks-monorepo-starter.onrender.com/" />
-<meta name="robots" content="index, follow" />
